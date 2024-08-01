@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>D3 page template</title>
+    <link rel="stylesheet" href="./begin.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        var dataset=[
+            [   {x:0,y:5},
+                {x:2,y:4},
+                {x:3,y:2},
+                {x:4,y:7},
+                {x:5,y:23}
+            ],
+            [   { x: 0, y: 10 },
+                { x: 1, y: 12 },
+                { x: 2, y: 19 },
+                { x: 3, y: 23 },
+                { x: 4, y: 17 },
+            ],
+            [   { x: 0, y: 22 },
+                { x: 1, y: 28 },
+                { x: 2, y: 32 }, 
+                { x: 3, y: 35 },
+                { x: 4, y: 43 },
+            ],
+        ]
+        var w = 300, h = 400;
+            var padding = { top: 50, bottom: 50, left: 30, right: 30 };
+
+            var svg = d3.select("body").append("svg")
+                .attr("width", w + padding.left + padding.right)
+                .attr("height", h + padding.top + padding.bottom);
+
+            var stack = d3.stack()
+                .keys(dataset.map(function (series) { return series.map(function (d) { return d.y; }); }))
+                .order(d3.stackOrderNone)
+                .offset(d3.stackOffsetNone);
+
+            var layer = stack(dataset);
+
+            var xScale = d3.scaleBand()
+                .domain(dataset[0].map(function (d) { return d.x; }))
+                .range([padding.left, w - padding.right])
+                .paddingInner(0.1);
+
+            var yScale = d3.scaleLinear()
+                .domain([0, d3.max(layer, function (layerData) {
+                    return d3.max(layerData, function (d) { return d[1]; });
+                })])
+                .range([h - padding.top, padding.bottom]);
+
+            var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+            var layers = svg.selectAll(".layer")
+                .data(layer)
+                .enter().append("g")
+                .attr("class", "layer")
+                .attr("fill", function (d, i) {
+                    return color(i);
+                });
+
+            layers.selectAll("rect")
+                .data(function (d) { return d; })
+                .enter().append("rect")
+                .attr("x", function (d) { return xScale(d.data.x); })
+                .attr("y", function (d) { return yScale(d[1]); })
+                .attr("height", function (d) { return yScale(d[0]) - yScale(d[1]); })
+                .attr("width", xScale.bandwidth);
+
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0," + (h - padding.bottom) + ")")
+                .call(d3.axisBottom(xScale));
+
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(" + padding.left + ",0)")
+                .call(d3.axisLeft(yScale));
+
+    </script>
+</body>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>D3 page template</title>
+    <link rel="stylesheet" href="./begin.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        var w=500,h=500;
+        var padding={top:50,bottom:50,left:30,right:30};
+        var svg=d3.select("body").append("svg")
+                .attr("width",w+padding.left+padding.right)
+                .attr("height",h+padding.top+padding.bottom);
+        
+        var data=[
+            {key: "生化",value:20},
+            {key:"爆破",value:25},
+            {key:"突破",value:55}
+        ]
+        
+        //比例尺
+        var xScale=d3.scaleBand()
+            .domain(data.map(function(d){
+                return d.key;
+            }))
+            .range([padding.left,w+padding.right])
+            .padding(0.1);
+        var yScale=d3.scaleLinear()
+            .domain([0,d3.max(data,function(d){
+                return d.value;
+            })])
+            .range([h,padding.bottom]);
+        //创建x,y轴
+        svg.append("g")
+            .attr("transform","translate(0,"+(h)+")")
+            .call(d3.axisBottom(xScale));
+        svg.append("g")
+            .attr("transform","translate("+padding.left+",0)")
+            .call(d3.axisLeft(yScale));
+
+        svg.selectAll(".bar")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("class","bar")
+            .attr("x",function(d){
+                return xScale(d.key);
+            })
+            .attr("y",function(d){
+                return yScale(d.value);
+            })
+            .attr("width",xScale.bandwidth())
+            .attr("height",function(d){
+                return h-yScale(d.value);
+            })
+            .attr("fill","black");
+    </script>
+</body>

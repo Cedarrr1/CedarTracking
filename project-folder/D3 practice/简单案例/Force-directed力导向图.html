@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>D3.js Force Directed Graph</title>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <style>
+
+
+            .link {
+                stroke: #999;
+                stroke-opacity: 0.6;
+            }
+            .node-label {
+            fill: #a8b6e3;
+            font-size: 12px;
+            text-anchor: middle;
+            user-select: none ; /*禁止文本选取*/
+        }
+        </style>
+    </head>
+
+    <body>
+        <svg width="1000" height="1000"></svg>
+        <script>
+            const svg = d3.select("svg")
+            .style("background-color","black");
+                width = +svg.attr("width"),
+                height = +svg.attr("height")
+                
+
+            var dataset = {
+                nodes: [
+                    { name: "red" },
+
+                    { name: "rosy" },
+                    { name: "crimson" },
+                    { name: "flushed" },
+                    { name: "chestnut" },
+                    { name: "bloodshot" },
+
+                    { name: "healthy" },
+                    { name: "glowing" },
+                    { name: "blooming" },
+                    { name: "ruddy" },
+                    { name: "roseate" },
+
+                    { name: "cardinal" },
+                    { name: "coral" },
+                    { name: "maroon" },
+                    { name: "claret" },
+                    { name: "carmine" },
+
+                    { name: "beetro" },
+                    { name: "suffu" },
+                    { name: "florid" },
+                    { name: "shamefaced" },
+                    { name: "rubicund" },
+
+                    { name: "carroty" },
+                    { name: "Titian" },
+                    { name: "foxy" },
+                    { name: "sandy" },
+                    { name: "bay" },
+
+                    { name: "red-rimmed" },
+                    { name: "infalmed" },
+                    { name: "bloodshot" },
+                ],
+                edges: [
+                    { source: 0, target: 1 },
+                    { source: 0, target: 2 },
+                    { source: 0, target: 3 },
+                    { source: 0, target: 4 },
+                    { source: 0, target: 5 },
+
+                    { source: 1, target: 6 },
+                    { source: 1, target: 7 },
+                    { source: 1, target: 8 },
+                    { source: 1, target: 9 },
+                    { source: 1, target: 10 },
+
+                    { source: 2, target: 11 },
+                    { source: 2, target: 12 },
+                    { source: 2, target: 13 },
+                    { source: 2, target: 14 },
+                    { source: 2, target: 15 },
+
+                    { source: 3, target: 16 },
+                    { source: 3, target: 17 },
+                    { source: 3, target: 18 },
+                    { source: 3, target: 19 },
+                    { source: 3, target: 20 },
+
+                    { source: 4, target: 21 },
+                    { source: 4, target: 22 },
+                    { source: 4, target: 23 },
+                    { source: 4, target: 24 },
+                    { source: 4, target: 25 },
+
+                    { source: 5, target: 26 },
+                    { source: 5, target: 27 },
+                    { source: 5, target: 28 },
+                ]
+            };
+            
+            var force = d3.forceSimulation()
+                .nodes(dataset.nodes)
+                .force("link", d3.forceLink(dataset.edges).distance(70))
+                .force("charge", d3.forceManyBody().strength(-550))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("gravity",d3.forceManyBody().strength(30))
+                .on("tick", ticked);
+
+            var link = svg.selectAll(".link")
+                .data(dataset.edges)
+                .enter()
+                .append("line")
+                .attr("class", "link");
+
+            var nodes = svg.selectAll("circle")
+                .data(dataset.nodes)
+                .enter()
+                .append("circle")
+                .attr("r", function(d,i){
+                    if(i>=6){
+                        return 10;
+                    }else return 20;
+                })
+                .style("fill", function (d, i) {
+                    if(i>=6){
+                        return "green";
+                    }else{
+                        return "lightgreen";
+                    }
+                    return ;
+                })
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+        var nodeLabel = svg.selectAll(".node-label")
+            .data(dataset.nodes)
+            .enter().append("text")
+            .attr("class", "node-label")
+            .attr("dy", 0) 
+            .text(function (d) { return d.name; })
+            .each(function(d,i) {
+                var textWidth = this.getComputedTextLength();
+                d3.select(this).attr("dx",function(d,i){
+                    if(i<=6){
+                        return 25+textWidth/2;
+                    } else {
+                        return textWidth/2-10;
+                    }
+                });  
+            });
+
+                    
+
+
+            function ticked() {
+                nodes.attr("cx", function (d) {
+                    return d.x;
+                })
+                    .attr("cy", function (d) {
+                        return d.y;
+                    });
+
+                link.attr("x1", function (d) {
+                    return d.source.x;
+                })
+                    .attr("x2", function (d) {
+                        return d.target.x;
+                    })
+                    .attr("y1", function (d) {
+                        return d.source.y;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.y;
+                    });
+                
+                nodeLabel
+                .attr("x", function (d) { return d.x; })
+                .attr("y", function (d) { return d.y; });
+            };
+            function dragstarted(d) {
+                if (!d3.event.active) force.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            };
+            function dragged(d) {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            };
+
+            function dragended(d) {
+                if (!d3.event.active) force.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            };
+        </script>
+    </body>
+
+    </html>

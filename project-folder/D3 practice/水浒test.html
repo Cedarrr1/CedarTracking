@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>D3 page template</title>
+    <link rel="stylesheet" href="./begin.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+      }
+
+      .axis text {
+        font-size: 15px;
+      }
+
+      .container {
+        display: flex;
+      }
+
+      .stackDisplay {
+        width: 800px;
+        height: 500px;
+        background-color: lightgray;
+      }
+
+      .lineDisplay {
+        width: 800px;
+        height: 300px;
+
+        background-color: lightblue;
+      }
+
+      .buttonContainer {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
+
+      .buttonDisplay {
+        background-color: lightgreen;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr); /*7列网格布局*/
+        grid-gap: 8px;
+      }
+
+      .buttonDisplay button {
+        margin-top: 2px;
+        margin-bottom: 1px;
+        margin-left: 15px;
+        margin-right: 5px;
+        padding: 5px 5px;
+      }
+      .tooltip {
+        position: absolute;
+        background-color: white;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div>
+        <div id="stackDisplay" class="stackDisplay">
+          <button onclick="ResetChart()">Reset</button>
+        </div>
+
+        <div id="lineDisplay" class="lineDisplay">
+          <!-- 这里放置 lineDisplay 的内容 -->
+        </div>
+      </div>
+
+      <div class="buttonContainer">
+        <div id="buttonDisplay" class="buttonDisplay">
+          <!-- 这里放置 buttonDisplay 的内容 -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 定义全局变量
+      let svg1, svg2;
+      let xScale, yScale1, yScale2, colorScale;
+      let yAxis1, yAxis2;
+      let stackedData, linedData;
+      let area,line;
+      let chapters;
+      let first10CharactersData; //初始选中的前十个人物的数据
+      let chosenCharacter;
+      let chosenMaxi = 0;
+      let margin;
+
+      d3.csv("水浒各章节人物出场次数.csv").then(function (data) {
+        //console.log(data);
+        chosenCharacter = data.slice(1, 11);
+        InitialChart(data);
+        generateButtons(data);
+
+        chapters= data.map(d => d.chapter);
+      });
+
+
+
+      // 创建堆叠图
+        margin = { top: 20, right: 20, bottom: 30, left: 50 };
+      const stackwidth = 800 - margin.left - margin.right;
+      const stackheight = 500 - margin.top - margin.bottom;
+      svg1 = d3
+        .select("#stackDisplay")
+        .append("svg")
+        .attr("width", stackwidth + margin.left + margin.right)
+        .attr("height", stackheight + margin.top + margin.bottom);
+
+      const linewidth = 1000 - margin.left - margin.right;
+      const lineheight = 300 - margin.top - margin.bottom;
+      svg2 = d3
+        .select("#lineDisplay")
+        .append("svg")
+        .attr("width", linewidth + margin.left + margin.right)
+        .attr("height", lineheight + margin.top + margin.bottom);
+
+      //初始化前10个角色的chart
+      function InitialChart(data) {
+        first10CharactersData = data.map((d) => ({
+          chapter: d.chapter,
+          ...Object.fromEntries(Object.entries(d).slice(1, 11)),
+        }));
+
+        chosenCharacter = data.map((d) => ({
+          chapter: d.chapter,
+          ...Object.fromEntries(Object.entries(d).slice(1, 11)),
+        })); //储存已选中角色
+        chosenMaxi = 9;
+
+        linedData = first10CharactersData.map((d) => ({
+          chapter: d.chapter,
+          value: d3.sum(Object.values(d).slice(1).map(Number)),
+        }));
+
+        //console.log(first10CharactersData);
+        const chapters = first10CharactersData.map((d) => d.chapter);
+
+        initialFrequecy = d3.max(first10CharactersData, (d) =>
+          d3.sum(Object.values(d).map(Number))
+        );
+
+        xScale = d3
+          .scaleBand()
+          .domain(chapters)
+          .range([margin.left, stackwidth + margin.left])
+          .padding(0.1);
+        const xAxis = d3.axisBottom(xScale);
+
+        svg1
+          .append("g")
+          .attr("class", "x-axis")
+          .attr("transform", "translate(0," + (stackheight + margin.top) + ")")
+          .call(xAxis)
+          .selectAll("text")
+          .style("text-anchor", "end")
+          .attr("dx", "-.8em")
+          .attr("dy", ".15em")
+          .attr("transform", "rotate(-65)");
+
+        svg2
+          .append("g")
+          .attr("class", "x-axis")
+          .attr("transform", "translate(0," + (lineheight + margin.top) + ")")
+          .call(xAxis);
+
+        yScale1 = d3
+          .scaleLinear()
+          .domain([0, initialFrequecy])
+          .range([stackheight + margin.top, margin.top]);
+
+        yScale2 = d3
+          .scaleLinear()
+          .domain([0, initialFrequecy])
+          .range([lineheight + margin.top, margin.top]);
+
+        const yAxis1 = d3.axisLeft(yScale1);
+        const yAxis2 = d3.axisLeft(yScale2);
+
+        svg1
+          .append("g")
+          .attr("class", "y-axis")
+          .attr("transform", "translate(" + margin.left + ",0)")
+          .call(yAxis1);
+
+        svg2
+          .append("g")
+          .attr("class", "y-axis")
+          .attr("transform", "translate(" + margin.left + ",0)")
+          .call(yAxis2);
+        /*colorScale = d3
+          .scaleOrdinal()
+          .domain(first10CharactersData[0])
+          .range(d3.schemeCategory10);*/
+        
+        const customColors = [
+  "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
+  "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf", 
+  "#ff9896", "#aec7e8", "#ffbb78", "#98df8a", "#ff9896", 
+  "#c5b0d5", "#c49c94", "#f7b6d2", "#c7c7c7", "#dbdb8d", 
+  "#9edae5", "#393b79", "#5254a3", "#6b6ecf", "#9c9ede", 
+  "#637939", "#8ca252", "#b5cf6b", "#cedb9c", "#8c6d31", 
+  "#bd9e39", "#e7ba52", "#e7cb94", "#843c39", "#ad494a", 
+  "#d6616b", "#e7969c", "#7b4173", "#a55194", "#ce6dbd", 
+  "#de9ed6", "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", 
+  "#e6550d", "#fd8d3c", "#fdae6b", "#fdd0a2", "#31a354", 
+  "#74c476", "#a1d99b", "#c7e9c0", "#756bb1", "#9e9ac8", 
+  "#bcbddc", "#dadaeb", "#636363", "#969696", "#bdbdbd", 
+  "#d9d9d9", "#253494", "#225ea8", "#1d91c0", "#41b6c4", 
+  "#7fcdbb", "#c7e9b4", "#ffffcc", "#843c39", "#ad494a", 
+  "#d6616b", "#e7969c", "#756bb1", "#9e9ac8", "#bcbddc", 
+  "#dadaeb", "#636363", "#969696", "#bdbdbd", "#d9d9d9", 
+  "#1a9641", "#a6d96a", "#d9ef8b", "#ffffbf", "#e41a1c", 
+  "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", 
+  "#a65628", "#f781bf", "#999999", "#66c2a5", "#fc8d62", 
+  "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", 
+  "#b3b3b3", "#8dd3c7", "#bebada", "#fb8072", "#80b1d3", 
+  "#fdb462", "#b3de69", "#fccde5", "#d9d9d9", "#bc80bd", 
+  "#ccebc5", "#ffed6f", "#bebada", "#8dd3c7", "#ffffb3", 
+  "#fb8072", "#80b1d3", "#fdb462", "#b3de69", "#fccde5", 
+  "#d9d9d9", "#bc80bd", "#ccebc5", "#ffed6f"
+];
+
+        colorScale = d3.scaleOrdinal()
+    .range(customColors);
+
+
+
+
+
+
+        //绘制stack chart
+        stack = d3
+          .stack()
+          .keys(Object.keys(first10CharactersData[0]).slice(1))
+          .order(d3.stackOrderNone)
+          .offset(d3.stackOffsetNone);
+        stackedData = stack(first10CharactersData);
+        //console.log(stackedData);
+        var area = d3
+          .area()
+          .x((d, i) => xScale(d.data.chapter))
+          .y0((d) => yScale1(d[0]))
+          .y1((d) => yScale1(d[1]));
+
+        svg1
+          .selectAll(".layer")
+          .data(stackedData)
+          .enter()
+          .append("path")
+          .attr("class", "layer")
+          .attr("d", area)
+          .style("fill", (d) => colorScale(d.key))
+          .on("mouseover", function (event, d) {
+            d3.select(this).style("opacity", 0.2);
+          })
+          .on("mouseout", function () {
+            d3.select(this).style("opacity", 1);
+          });
+
+        //绘制line chart
+        const line = d3
+          .line()
+          .x((d) => xScale(d.chapter))
+          .y((d) => yScale2(+d.value));
+
+        svg2
+          .append("path")
+          .datum(linedData)
+          .attr("class", "line")
+          .attr("d", line)
+          .style("fill", "none")
+          .style("stroke", "steelblue");
+      }
+
+      
+
+      function generateButtons(data) {
+        //console.log(data);
+        const buttonsContainer = d3.select("#buttonDisplay");
+        const characters = data.columns.slice(1); // 人物名称列表
+        characters.forEach((character, index) => {
+          const color = colorScale(character);
+          const button = buttonsContainer.append("button");
+          button.text(character);
+
+          if (index < 10) {
+            button.style("background-color", color);
+          }
+
+          button.on("click", () => {
+            const isChosen = chosenCharacter.includes(character);
+            if (isChosen) {
+              const i = chosenCharacter.indexOf(character);
+              chosenMaxi--;
+              chosenCharacter.splice(i, 1);
+              button.style("background-color", "");
+            } else {
+              chosenMaxi++;
+
+              // 遍历 chosenCharacter 中的每个单元（对象）
+              chosenCharacter.forEach((unit, index) => {
+                unit[character] = data[index][character];
+              });
+
+              //console.log(chosenCharacter);
+
+              button.style("background-color", color);
+            }
+
+            updateStackChart(data, chosenCharacter);
+            updateLineChart(data,chosenCharacter);
+
+            
+
+
+          });
+        });
+      }
+
+      function updateStackChart(data, chosenCharacter) {
+        //console.log(chosenCharacter);
+        //console.log(first10CharactersData);
+        //console.log(chosenCharacter[0]);
+        // 更新堆叠图
+        stack = d3
+          .stack()
+          .keys(Object.keys(chosenCharacter[0]).slice(1))
+          .order(d3.stackOrderNone)
+          .offset(d3.stackOffsetNone);
+
+        stackedData = stack(chosenCharacter);
+
+        //console.log(stackedData);
+
+        // 更新堆叠图的比例尺
+        const initialFrequency = d3.max(
+          stackedData[stackedData.length - 1],
+          (d) => d[1]
+        );
+        yScale1.domain([0, initialFrequency])
+                .call(yAxis1);
+
+        area = d3
+          .area()
+          .x((d, i) => xScale(d.data.chapter))
+          .y0((d) => yScale1(d[0]))
+          .y1((d) => yScale1(d[1]));
+
+        // 选择现有的图层并更新
+        const layers = svg1.selectAll(".layer").data(stackedData);
+
+        // 更新现有的图层
+        layers.transition()
+        .duration(500)
+        .attr("d", area)
+        .style("fill", (d) => colorScale(d.key));
+
+        // 移除多余的图层
+        layers.exit().remove();
+
+        // 添加新的图层
+        const newLayers = layers.enter().append("g")
+        .attr("class", "layer");
+
+        newLayers.append("path")
+        .attr("d", area)
+        .style("fill", (d) => colorScale(d.key))
+        .on("mouseover", function (event, d) {
+            d3.select(this).style("opacity", 0.2);
+        })
+        .on("mouseout", function () {
+            d3.select(this).style("opacity", 1);
+        });
+
+        
+
+      }
+      
+    function updateLineChart(data, chosenCharacter) {
+    const linedData = chosenCharacter.map((d) => ({
+        chapter: d.chapter,
+        value: d3.sum(Object.values(d).slice(1).map(Number)),
+    }));
+
+    // 更新 y 轴比例尺的域
+    const maxValue = d3.max(linedData, d => d.value);
+    yScale2.domain([0, maxValue])
+        .call(yAxis2);
+
+    // 创建线条生成器函数
+    const line = d3.line()
+        .x(d => xScale(d.chapter))
+        .y(d => yScale2(d.value));
+
+    const linePath = svg2.selectAll(".line").data([linedData]);
+
+    // 检查选择集是否为空
+    if (!linePath.empty()) {
+        // 更新现有的线条路径
+        linePath.attr("d", line);
+
+        // 添加新的线条路径
+        linePath.enter()
+            .append("path")
+            .attr("class", "line")
+            .attr("d", line) // 这里调用了线生成器函数
+            .style("fill", "none")
+            .style("stroke", "steelblue");
+
+        // 移除多余的线条路径
+        linePath.exit().remove();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+    </script>
+  </body>
+</html>

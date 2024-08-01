@@ -1,0 +1,145 @@
+<html>
+    <head>
+        <style>
+            table,td{
+                border: 3px solid rgba(0, 0, 0, 0.637);
+                border-collapse: collapse;
+                text-align: center;
+                
+            }
+            table{
+                background-color: rgba(100, 148, 237, 0.361);
+                width: 400px;
+                height: 200px;
+            }
+            td{
+                text-align: center;
+                vertical-align: center;
+                padding: 15px;
+                color: cadetblue;
+            }
+        </style>
+    <link rel="stylesheet" href="./public.css">
+    </head>
+    <body>
+        <h1 class="header">
+            <strong>数学经典问题<em style="color: cadetblue;font-size: smaller;">——鸡兔同笼问题</em></stong>
+            <br>
+            <i style="font-size: smaller;">在c语言上的计算实现</i>
+        </h1>
+            <br><br>
+            <div class="explanation">  
+                问题简介：
+                <blockquote style="font-size: smaller;">
+                <p3><ins style="font-size: larger;">《孙子算经》</ins></p3>
+                <p4>
+                中“鸡兔同笼”问题原文如下： 今有雉兔同笼，上有三十五头，下有九十四足，问雉兔各几何？
+                </p4>
+                <br>
+                <p5>翻译成现代白话文为： 现在有若干只鸡和兔在同一个笼子里，从上面数，有35个头；从下面数，有94只脚。
+                </p5>
+                </blockquote>
+            </div>
+            <div class="learning-sequence-section">
+                        <p><a href="#题解">查看题解</a>
+            </p>
+            <hr>
+            <pre>
+                <var>
+                      #include <stdio.h>
+                    #include <math.h>
+                        int main()
+                        {
+                        int m,n;
+                        while(scanf("%d %d",&n,&m)!=EOF){
+                        if(n==0 && m==0){
+                        return 0;
+                        }
+                        int x,y;
+                        y=(m-n*2)/2;
+                        x=n-y;
+                        if(x+y==n &&x*2+y*4==m&&x>0&&y>0){
+                        printf("%d %d\n",x,y);
+                        }else {
+                        printf("Error\n");
+                        }
+                        }
+                        return 0;
+                        }   
+                </var>
+           
+            </pre>
+           
+            <hr>
+            
+            <h2 style="font-size: medium;"><a name="题解">题解</a> </h2>           
+                <p1 style="font-size: small;color: blueviolet;">
+                首先输入n个头，m只脚.然后定义俩个变量x，y
+                <br>
+                m-2*n为“多”出的脚数,以此计算出兔子的数目
+                <br>
+                二者相减 即可得出鸡的数目。
+                <br>
+                判断给出的m，n是否成立在输出x，y。
+     
+            <br><br><hr>
+            <p style="color: black;font-size: larger;">
+                <em>按照《孙子算经》所述题目，n=35，m=94.</em>
+            </p>
+
+        <table>
+            <caption style="color: chocolate;">鸡兔同笼数据</caption>  
+                <tr>
+                    <th colspan="2">种类</th>
+                </tr>
+                <tr>
+                    <td>鸡</td>
+                    <td >兔子</td>
+                </tr>
+                <tr>
+                    <th colspan="2" align="center">只数</th>
+                </tr>
+                <tr>
+                    <td>x=35-12=23</td>
+                    <td>y=（94-35*2）/2=12</td>
+                </tr>
+        </table>
+            </div>
+            <br><br><hr>
+            <div style="text-align: start;">
+            <p>
+                如果想要学习如何制作此网页,您可以访问<a href="https://www.w3school.com.cn/html/html_links.asp">W3</a>       
+                <img src="https://www.w3school.com.cn/i/eg_cute.gif"  >
+            <br>
+                学习步骤：
+                <ol type="I">
+                    <li>下载vscode</li>
+                    <li>浏览w3内容进行学习</li>
+                    <li>敲代码复现
+                        <ol type="i">
+                            <li>记忆源代码</li>
+                            <li>尝试默写</li>
+                            <li>重复操作多多熟练</li>
+                        </ol>
+                    </li>  
+                </ol> 
+            </p>
+            <address>
+                <a href="https://www.csu.edu.cn/">
+                    <img src="OIP-C.jpg" width="100px">
+                </a>
+                <em>
+                Written by Cedar<br>
+                Visit us by:<br>
+                28.NORTH.502<br>
+                CHINA Chang Sha<br>
+                Central South University
+                </em> 
+            </address>
+            </div>
+            
+
+            <div style="float: right;"></div>
+
+    </body>
+</html>

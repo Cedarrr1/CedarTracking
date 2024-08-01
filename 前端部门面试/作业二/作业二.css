@@ -1,0 +1,170 @@
+.top{
+    height: 800px;
+    position: relative;
+    right: 10px;
+    margin: 5px;
+    background-image: url('./images/top.png');
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items:flex-start;
+
+}
+.top-box1{
+    width: 1350px;
+    height: 200px;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+}
+.top-header{
+    width: 200px;
+    height: 80px;
+    position: absolute;
+    float: left;
+    left: 200px;
+    top: 30px;
+    font-size: xx-large;
+    color: brown;
+
+
+}
+.top-nav{
+    position: absolute;
+    left: 500px;
+    width: 800px;
+    float: left;
+
+}
+dl dd{
+    position: relative;
+    top: 20px;
+    left: 60px;
+    float: left;
+    margin: 0 30px;
+    color: white;
+    font-size: small;
+}
+.top-box2{
+        width: 1350px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+}
+.top-main{
+    position: relative;
+    top: 20px;
+    left: 0px;
+    width: 50%;
+    margin: auto;
+    text-align: center;
+    font-size: xx-large;
+    color: white;
+}
+.top-buttonlikebox{
+    position: relative;
+    height: 100px;
+    width: 1350px;
+    display: flex;
+    justify-content: center;
+}
+.top-buttonlike{
+    position: relative;
+    left: 30px;
+    width: 120px;
+    height: 50px;
+    float: left;
+    margin: 0 30px;
+    color: white;
+    background-color: rgba(128, 128, 128, 0.228);
+    text-align: center;
+    font-size: medium;
+}
+.scrolldown-button{
+    justify-content: center;
+    position: relative;
+    left: 650px;
+    width: 120px;
+    height: 50px;
+    color: white;
+    text-align: center;
+    font-size: medium;
+}
+.section1{
+    position: relative;
+   display: flex;
+   flex-direction: row;
+   left: 50px;
+   right: 50px;
+   width: 1350px;
+   height: 500px;
+}
+.section1-text{
+    flex: 3;
+    position: relative;
+    top: 50px;
+    left: 40px;
+    width: 250px;
+    height: 300px;
+    justify-content: flex-start;
+    align-content:flex-start;
+    text-align: justify;
+    font-size: medium;
+}
+.text-button{
+    width: 150px;
+    height: 50px;
+    position: absolute;
+    top: 250px;
+    left: 450px;
+    text-align: center;
+    font-size: large;
+    color: white;
+    background-color: orange;
+}
+.section1-image{
+    position: relative;
+    left: 100px;
+    top: 50px;
+    width: 700px;
+    height: 400px;
+    flex: 4;
+    float: right;
+}
+.section1-imgpart{
+    position: absolute;
+    left: 150px;
+    top: 450px;
+    flex-direction: row;
+    margin: 0 50px;
+}
+.section2{
+    position:relative;
+    top: 300px;
+    display: flex;
+    flex-direction: row;
+    width: 1350px;
+    height: 1000px;
+    background-color: rgba(245, 222, 179, 0.171);
+}
+.reservationtable{
+    width: 500px;
+    height: 800px;
+    position: absolute;
+    flex-direction: column;
+    top: 100px;
+    left: 150px;
+    align-items: center;
+    background-color: whitesmoke;
+}
+form{
+    position: absolute;
+    top: 30px;
+    width: 350px;
+    height: 40px;
+    background-color: rgba(128, 128, 128, 0.817);
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 page template</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let w = 1050, h = 600;
+        let padding = { left: 80, top: 15, right: 60, bottom: 200 };
+        let svg = d3.select('body').append('svg')
+            .attr('width', w + padding.left + padding.right)
+            .attr('height', h + padding.bottom + padding.top);
+
+        const g = svg.append("g").attr("id", "maingroup")
+            .attr("transform", `translate(${padding.left},${padding.top})`);
+
+            //series[国家][时间]
+            //series每个元素都是代表一个国家数据的数组，由多个对象组成
+            //这些对象有两个属性，'data'指向原始数据行；'0','1','index'，其中'0'和'1'分别代表堆叠的底部和顶部
+                    d3.csv("gdp_data_source.csv", function (d) {
+                    // 将csv中每一行的日期字段解析为Date对象
+                    d.year = new Date(d.year);
+                    return d;
+                })
+                    .then(function(data){
+                       
+                        var stack=d3.stack()
+                        .keys(data.columns.slice(1))
+                        .order(d3.stackOrderAscending)
+                        .offset(d3.stackOffsetNone);
+                    var series = stack(data);
+                    //console.log(series);
+                    //series[国家][时间]
+                        var yearsDataAscending=[];
+                        var yearsDataSum=[];
+                        for(var i=0;i<58;i++){
+                            var a=[];
+                            var b=[];
+                            for(var j=0;j<215;j++){
+                                a.push(series[j][i][1]-series[j][i][0]);
+                            }    
+                            a.sort(function(x,y){
+                                return Number(x)-Number(y);//从小到大
+                            });
+                            b.push(a[0]);
+                            for(var k=1;k<215;k++){
+                                b.push(a[k]+b[k-1]);//自己和小于自己GDP的GDP总和
+                            }
+                            yearsDataAscending.push(a);
+                            yearsDataSum.push(b);
+                        }
+                    //比例尺
+                        var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+                        
+                        var xscale = d3.scaleTime()
+                            .domain(d3.extent(data, function (d) { return d.year; })) // x 轴范围为数据中的年份
+                            .range([0, w]);
+
+                        
+                        var yscale = d3.scaleLinear()
+                            .domain([0, d3.max(series, function (layer) { return d3.max(layer, function (d) { return d[1]; }); }) / 1000000000000])
+                            .nice()
+                            .range([h, 0]);
+
+
+                                                
+                        var area = d3.area()
+                            .x(d => (xscale(d.data.year)))
+                            .y0(function (d, i) {
+                                var tmp = d[1] - d[0];
+                                for (var j = 0; j < 215; j++) {
+                                    if (yearsDataAscending[i][j] == d[1] - d[0])
+                                        return yscale((yearsDataSum[i][j] - d[1] + d[0]) / 1000000000000);
+                                }
+                            })
+                            .y1(function (d, i) {
+                                var tmp = d[1] - d[0];
+                                for (var j = 0; j < 215; j++) {
+                                    if (yearsDataAscending[i][j] == d[1] - d[0])
+                                        return yscale((yearsDataSum[i][j]) / 1000000000000);
+                                }
+                            })
+                            .curve(d3.curveCardinal);
+                    
+                        var colorChange = (event) => {
+                            d3.selectAll(".aa")
+                                .attr("opacity", 0.1)
+                                .attr("fill", "grey");
+                            d3.select(event.currentTarget)
+                                .attr("opacity", 1)
+                                .attr("fill", "blue");
+                        };
+                        var colorRecover = (event) => {
+                            svg.selectAll("path")
+                                .attr("opacity", 1)
+                                .attr("fill", d => (color(d.key)));
+                        };    
+
+                        g.selectAll("path")
+                            .data(series)
+                            .enter()
+                            .append("path")
+                            .attr("fill", d => (color(d.key)))
+                            .attr("d", area)
+                            .attr("class", "aa")
+                            .on("mouseover", colorChange)
+                            .on("mouseout", colorRecover);
+                    
+                        // 添加 x, y 轴
+                        g.append("g")
+                            .attr("class", "axis")
+                            .attr("transform", "translate(0," + h + ")")
+                            .call(d3.axisBottom(xscale));
+                        g.append("g")
+                            .attr("class", "axis")
+                            .call(d3.axisLeft(yscale))
+                            .call(g=>g.append("text")
+                                        .attr("x",+10)
+                                        .attr("y",+5)
+                                        .attr("fill","currentColor")
+                                        .attr("text-anchor","start")
+                                        .attr("font-size","2em")
+                                        .text("万亿（美元）")    
+                                    );
+
+                        svg.append("g")
+                            .selectAll("text")
+                            .data(series)
+                            .enter()
+                            .append("text")
+                            .attr("x", w+padding.left)
+                            .attr("y", function (d, i) {
+                                for (var j = 0; j < 215; j++) {
+                                    if ((d[57][1] - d[57][0]) == yearsDataAscending[57][j]) {
+                                        return yscale((yearsDataSum[57][j] - (d[57][1] - d[57][0]) / 2) / 1000000000000);
+                                    }
+                                }
+                            })
+                            .text(function (d, i) {
+                                for (var j = 10; j >= 1; j--) {
+                                    if ((d[57][1] - d[57][0]) == yearsDataAscending[57][215 - j]) {
+                                        return d.key;
+                                    }
+                                }
+                                return null;
+                            });
+                            
+                        
+                    });
+    </script>
+</body>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Directed Graph</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+
+        .node {
+            fill: lightblue;
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+
+        .highlight {
+            fill: orange;
+        }
+
+        .node-label {
+            fill: #000;
+            font-size: 12px;
+            text-anchor: middle;
+            user-select: none ; /*禁止文本选取*/
+        }
+
+        .highlight-label {
+            fill: orange;
+        }
+    </style>
+</head>
+
+<body>
+    <svg width="800" height="600"></svg>
+    <button onclick="highlightNodes(1)">k=1</button>
+    <button onclick="highlightNodes(2)">k=2</button>
+    <button onclick="clearHighlight()">Clear</button>
+
+    <script>
+        var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        // 提供的矩阵数据
+        var matrix = [
+            [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 1, 1, 0, 1, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 1, 1, 0, 0, 0, 0],
+            [0, 1, 0, 1, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 1, 1, 0, 1, 0, 0, 0],
+            [0, 1, 0, 0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+        ];
+        
+        var simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(function (d, i) { return i; }).distance(150)) // 设置连接线的长度为100
+            .force("charge", d3.forceManyBody().strength(-250))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+        var links = [];
+        
+        var kCoreValues = { 0: 1, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 1, 9: 0 };
+
+        var nodes = matrix.map(function (row, i) {
+            
+            return { id: i, kcore: kCoreValues[i] || 0 }; // 如果没有 kcore，则默认为 0
+        });
+
+        matrix.forEach(function (row, sourceIdx) {
+            row.forEach(function (col, targetIdx) {
+                if (col === 1) {
+                    links.push({ source: sourceIdx, target: targetIdx });
+                }
+            });
+        });
+
+        var link = svg.selectAll(".link")
+            .data(links)
+            .enter().append("line")
+            .attr("class", "link");
+
+        var node = svg.selectAll(".node")
+            .data(nodes)
+            .enter().append("circle")
+            .attr("class", "node")
+            .attr("r", 15) // 节点半径
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        var isDragging = false;
+
+            svg.on("mousedown", function () {
+                isDragging = true;
+            })
+                .on("mouseup", function () {
+                    isDragging = false;
+                });
+
+            document.addEventListener("mousemove", function (event) {
+                if (!isDragging) {
+                    if (event.target.classList.contains("node-label")) {
+                        event.preventDefault();
+                    }
+                }
+            });
+    
+
+
+        var nodeLabel = svg.selectAll(".node-label")
+            .data(nodes)
+            .enter().append("text")
+            .attr("class", "node-label")
+            .attr("dy", 5) // 垂直偏移
+            .text(function (d) { return  + d.id; });
+
+        var kCoreValues = { 0: 1, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 1, 9: 0 };
+
+        var buttons = document.querySelectorAll("button");
+
+        function highlightNodes(k) {
+            
+            nodes.attr("class", function (d) {
+                return d.kcore === k ? "node highlight" : "node";
+            });
+
+            buttons.forEach(function (button, index) {
+                if (index === k - 1) {
+                    button.classList.add("highlight-label");
+                } else {
+                    button.classList.remove("highlight-label");
+                }
+            });
+        }
+
+        function clearHighlight() {
+            nodes.attr("class", "node");
+            buttons.forEach(function (button) {
+                button.classList.remove("highlight-label");
+            });
+        }
+
+        simulation
+            .nodes(nodes)
+            .on("tick", ticked);
+
+        simulation.force("link")
+            .links(links);
+
+        function ticked() {
+            link
+                .attr("x1", function (d) { return d.source.x; })
+                .attr("y1", function (d) { return d.source.y; })
+                .attr("x2", function (d) { return d.target.x; })
+                .attr("y2", function (d) { return d.target.y; });
+
+            node
+                .attr("cx", function (d) { return d.x; })
+                .attr("cy", function (d) { return d.y; });
+
+            nodeLabel
+                .attr("x", function (d) { return d.x; })
+                .attr("y", function (d) { return d.y; });
+        }
+
+        function dragstarted(d) {
+            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(d) {
+            d.fx = d3.event.x;
+            d.fy = d3.event.y;
+        }
+
+        function dragended(d) {
+            if (!d3.event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+        var highlightedK = []; // 用于跟踪当前高亮的 k 值
+
+            function highlightNodes(k) {
+                // 移除所有节点的高亮样式
+                node.attr("class", function (d) {
+                    return d.kcore === k ? "node highlight" : "node";
+                });
+
+                // 移除所有按钮的高亮样式
+                buttons.forEach(function (button) {
+                    button.classList.remove("highlight-label");
+                });
+
+                // 为被点击的按钮添加高亮样式
+                buttons[k - 1].classList.add("highlight-label");
+
+                // 更新当前高亮的 k 值
+                highlightedK = [k];
+            }
+
+            function clearHighlight() {
+                // 移除所有节点的高亮样式
+                node.attr("class", "node");
+
+                // 移除所有按钮的高亮样式
+                buttons.forEach(function (button) {
+                    button.classList.remove("highlight-label");
+                });
+
+                // 清空当前高亮的 k 值
+                highlightedK = [];
+            }
+
+
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>temple</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+<style>
+        .dot {
+            fill: steelblue;
+        }
+
+        .svg {
+            width: 1200px;
+            height: 700px;
+            position: absolute;
+            top: 60px;
+            left: 100px;
+            background-color: blanchedalmond;
+        }
+    </style>
+</head>
+
+<body>
+    <svg class="svg"></svg>
+    <span>展示类型：</span>
+    <span>无序状态/</span>
+    <span id="continent">大州/</span>
+    <span id="gender">性别/</span>
+    <span id="age">年龄/</span>
+    <span id="religion">宗教/</span>
+    <span id="literacy">读写能力/</span>
+    <span id="college">学历/</span>
+    <span id="internet">网络/</span>
+    <span id="phones">手机/</span>
+    <span id="water">饮用水/</span>
+    <span id="poverty">贫穷情况/</span>
+    <span id="nutrition">营养状况/</span>
+    <span id="housing">住房/</span>
+    <span id="language">母语/</span>
+    <span id="area">城乡</span>
+    <script>
+
+        let w = 1200, h = 700;
+        var svg = d3.select("svg");
+        const data = d3.range(100).map((d, i) => {
+                let continent;
+                if (i < 60) {
+                    continent = "as"; // Asia
+                } else if (i < 76) {
+                    continent = "af"; // Africa
+                } else if (i < 85) {
+                    continent = "sa"; // South America
+                } else if (i < 90) {
+                    continent = "na"; // North America
+                } else {
+                    continent = "eu"; // Europe
+                }
+
+                let gender;
+                if (i < 50) {
+                    gender = "male";
+                } else {
+                    gender = "female";
+                }
+                
+                let age;
+                if(i<25){
+                    age="fourteen";
+                }else if(i<91){
+                    age="sixtyfour";
+                }else{
+                    age="sixtyfive";
+                }
+
+                let religion;
+                if(i<31){
+                    religion="christians";
+                }
+                else if(i<54){
+                    religion="muslims";
+                }else if(i<69){
+                    religion="hindus";
+                }else if(i<76){
+                    religion="buddhists";
+                }else if(i<84){
+                    religion="others";
+                }else{
+                    religion="noreligion";
+                }
+
+                let literacy;
+                if(i<86){
+                    literacy="yesliteracy";
+                }else{
+                    literacy="noliteracy";
+                }
+
+                let college;
+                if(i<7){
+                    college="havecollege";
+                }else{
+                    college="nocolleage";
+                }
+
+                let internet;
+                if(i<30){
+                    internet="yesinternet";
+                }else{
+                    internet="nointernet";
+                }
+
+                let phones;
+                if(i<75){
+                    phones="havephones";
+                }else{
+                    phones="nophones";
+                }
+
+                let water;
+                if(i<87){
+                    water="havewater";
+                }else{
+                    water="nowater";
+                }
+
+                let poverty;
+                if(i<48){
+                    poverty="poverty";
+                }else{
+                    poverty="nopoverty";
+                }
+
+                let nutrition;
+                if(i<21){
+                    nutrition="overweight";
+                }else if(i<84){
+                    nutrition="adequate";
+                }else if(i<99){
+                    nutrition="undernourished";
+                }else {
+                    nutrition="starving";
+                }
+
+                let housing;
+                if(i<23){
+                    housing="nohousing";
+                }else{
+                    housing="yeshousing";
+                }
+
+                let language;
+                if(i<12){
+                    language="chinese";
+                }else if(i<18){
+                    language="spanish";
+                }else if(i<23){
+                    language="english";
+                }else if(i<26){
+                    language="arabic";
+                }else if(i<30){
+                    language="hindi";
+                }else if(i<33){
+                    language="bengali";
+                }else if(i<36){
+                    language="portuguese";
+                }else if(i<38){
+                    language="russian";
+                }else if(i<40){
+                    language="japanese";
+                }else{
+                    language='otherlanguage';
+                }
+
+                let area;
+                if(i<46){
+                    area="rural";
+                }else {
+                    area="urban";
+                }
+
+                return {
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    vx: Math.random() * 2 - 1,
+                    vy: Math.random() * 2 - 1,
+                    continent: continent,
+                    gender: gender,
+                    area:area,
+                    language:language,
+                    nutrition:nutrition,
+                    poverty:poverty,
+                    water:water,
+                    phones:phones,
+                    internet:internet,
+                    college:college,
+                    religion:religion,
+                    age:age,
+                    literacy:literacy,
+                    housing:housing
+                };
+            });
+
+        var dots = svg.selectAll("circle")
+            .data(data)
+            .enter().append("circle")
+            .attr("r", 5)
+            .attr("cx", function (d) {
+                return d.x;
+            })
+            .attr("cy", function (d) {
+                return d.y;
+            })
+             .attr("class", function (d) {
+                // 连接多个类名并返回
+                return "dot " + d.continent + " " + d.gender + " " + d.age + " " + d.religion + " " + d.literacy + " " + d.college + " " + d.internet + " " + d.phones + " " + d.water + " " + d.poverty + " " + d.nutrition + " " + d.housing + " " + d.language + " " + d.area;
+            });
+
+        // 定义轨迹长度
+            var trailLength = 20;
+
+            // 定义轨迹数组
+            var trails = [];
+
+            // 创建初始轨迹
+            for (var i = 0; i < data.length; i++) {
+                trails[i] = [];
+                for (var j = 0; j < trailLength; j++) {
+                    trails[i][j] = { x: data[i].x, y: data[i].y };
+                }
+            }
+
+            // 创建轨迹路径
+            var trailPath = svg.selectAll(".trail")
+                .data(trails)
+                .enter().append("path")
+                .attr("class", "trail")
+                .attr("fill", "none")
+                .attr("stroke", "rgba(0, 0, 255, 0.2)") // 设置轨迹颜色和透明度
+                .attr("stroke-width", 1.5);
+
+            // 更新轨迹位置
+            function updateTrails() {
+                for (var i = 0; i < data.length; i++) {
+                    trails[i].pop();
+                    trails[i].unshift({ x: data[i].x, y: data[i].y });
+                }
+
+                trailPath.attr("d", function (d) {
+                    return d3.line()
+                        .x(function (d) { return d.x; })
+                        .y(function (d) { return d.y; })
+                        .curve(d3.curveLinear)(d);
+                });
+            }
+
+        function moveDots() {
+                dots.attr("cx", function (d) {
+                    d.x += d.vx;
+                    if (d.x - 5 <= 0 || d.x + 5 >= w) {
+                        d.vx = -d.vx;
+                    }
+                    return d.x;
+                })
+                    .attr("cy", function (d) {
+                        d.y += d.vy;
+                        if (d.y - 5 <= 0 || d.y + 5 >= h) {
+                            d.vy = -d.vy;
+                        }
+                        return d.y;
+                    });
+                updateTrails();
+            }
+
+        var intervalID = setInterval(moveDots, 20);
+        
+        var spacingX = 12, spacingY = 15;
+        d3.select("#continent").on("click", function () {
+            svg.selectAll("text").remove();
+            svg.selectAll(".trail").remove();
+            clearInterval(intervalID);
+            //大洲
+            const continentname=["亚洲","非洲","南美洲","北美洲","欧洲"]
+            svg.selectAll("text")
+            .data(continentname)
+            .enter()
+            .append("text")
+            .text(function(d){
+                return d;
+            })
+            .attr("x",function(d,i){
+                return w/6*(i+1);
+            })
+            .attr("y",h/2).attr("text-anchor", "middle") // 设置文本锚点为中心
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", "16px") 
+            .attr("fill", "orange");
+
+            let ass=w/6,afs=w*2/6,sas=w*3/6,nas=w*4/6,eus=w*5/6;
+            
+            svg.selectAll(".as")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = ass - 5 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+            svg.selectAll(".af")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = afs - 5 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+            svg.selectAll(".sa")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = sas - 4 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+            svg.selectAll(".na")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = nas - 2 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+            svg.selectAll(".eu")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = eus - 5 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+        });
+        //性别
+        d3.select("#gender").on("click", function () {
+                svg.selectAll("text").remove();
+
+                const gendername = ["男性","女性"]
+            svg.selectAll("text")
+                .data(gendername)
+                .enter()
+                .append("text")
+                .text(function (d) {
+                    return d;
+                })
+                .attr("x", function (d, i) {
+                    return w / 3 * (i + 1);
+                })
+                .attr("y", h / 2)
+                .attr("text-anchor", "middle") // 设置文本锚点为中心
+                .attr("dominant-baseline", "middle")
+                .attr("font-size", "16px")
+                .attr("fill", "orange");
+
+            let fs = w/3, ms = w *2/3;
+
+
+            svg.selectAll(".female")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = fs - 5 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+            svg.selectAll(".male")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = ms - 5 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+        });  
+        //年龄
+        d3.select("#age").on("click", function () {
+                svg.selectAll("text").remove();
+
+                const agename = ["aged 0-14","aged 15-64","aged 65+"]
+                svg.selectAll("text")
+                    .data(agename)
+                    .enter()
+                    .append("text")
+                    .text(function (d) {
+                        return d;
+                    })
+                    .attr("x", function (d, i) {
+                        return w / 4 * (i + 1);
+                    })
+                    .attr("y", h / 2)
+                    .attr("text-anchor", "middle") // 设置文本锚点为中心
+                    .attr("dominant-baseline", "middle")
+                    .attr("font-size", "16px")
+                    .attr("fill", "orange");
+
+                let s14 = w / 4, s64 = w * 2 / 4,s65=w*3/4;
+
+
+                svg.selectAll(".fourteen")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = s14 - 5 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                svg.selectAll(".sixtyfour")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = s64 - 5 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                    svg.selectAll(".sixtyfive")
+                .data(data)
+                .transition()
+                .duration(1500)
+                .attr("cx", function (d, i) {
+                    var nx = s65 - 5 * spacingX + (i % 10) * spacingX;
+                    return nx;
+                })
+                .attr("cy", function (d, i) {
+                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                    return ny;
+                });
+            });
+            //宗教
+            d3.select("#religion").on("click", function () {
+                    svg.selectAll("text").remove();
+
+                    const religionname = ["Christian", "Muslims", "Hindus","Buddhists","Other","No religion"];
+                    svg.selectAll("text")
+                        .data(religionname)
+                        .enter()
+                        .append("text")
+                        .text(function (d) {
+                            return d;
+                        })
+                        .attr("x", function (d, i) {
+                            return w / 7 * (i + 1);
+                        })
+                        .attr("y", h / 2)
+                        .attr("text-anchor", "middle") // 设置文本锚点为中心
+                        .attr("dominant-baseline", "middle")
+                        .attr("font-size", "16px")
+                        .attr("fill", "orange");
+
+                    let chrs = w / 7, ms = w * 2 / 7, hs = w * 3 / 7,bs=w*4/7,os=w*5/7,nos=w*6/7;
+
+
+                    svg.selectAll(".christians")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = chrs - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".muslims")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = ms - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".hindus")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = hs - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".buddhists")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = bs - 3 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                   svg.selectAll(".others")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = os - 4 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                   svg.selectAll(".noreligion")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = nos - 5 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });  
+                });
+            //读写
+            d3.select("#literacy").on("click", function () {
+                    svg.selectAll("text").remove();
+
+                    const literacyname = ["able to read & write", "unable"];
+                    svg.selectAll("text")
+                        .data(literacyname)
+                        .enter()
+                        .append("text")
+                        .text(function (d) {
+                            return d;
+                        })
+                        .attr("x", function (d, i) {
+                            return w / 3 * (i + 1);
+                        })
+                        .attr("y", h / 2)
+                        .attr("text-anchor", "middle") // 设置文本锚点为中心
+                        .attr("dominant-baseline", "middle")
+                        .attr("font-size", "16px")
+                        .attr("fill", "orange");
+
+                    let lcs = w / 3, lns = w * 2 / 3;
+
+
+                    svg.selectAll(".yesliteracy")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = lcs - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".noliteracy")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = lns - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                });
+                //学历
+                d3.select("#college").on("click", function () {
+                        svg.selectAll("text").remove();
+
+                        const collegename = ["have a college degree", "do not"];
+                        svg.selectAll("text")
+                            .data(collegename)
+                            .enter()
+                            .append("text")
+                            .text(function (d) {
+                                return d;
+                            })
+                            .attr("x", function (d, i) {
+                                return w / 3 * (i + 1);
+                            })
+                            .attr("y", h / 2)
+                            .attr("text-anchor", "middle") // 设置文本锚点为中心
+                            .attr("dominant-baseline", "middle")
+                            .attr("font-size", "16px")
+                            .attr("fill", "orange");
+
+                        let chs = w / 3, cns = w * 2 / 3;
+
+
+                        svg.selectAll(".yesliteracy")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = chs - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                        svg.selectAll(".noliteracy")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = cns - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                    });  
+                    //网络
+                d3.select("#internet").on("click", function () {
+                        svg.selectAll("text").remove();
+
+                        const internetname = ["can access the internet", "cannot access the internet"];
+                        svg.selectAll("text")
+                            .data(internetname)
+                            .enter()
+                            .append("text")
+                            .text(function (d) {
+                                return d;
+                            })
+                            .attr("x", function (d, i) {
+                                return w / 3 * (i + 1);
+                            })
+                            .attr("y", h / 2)
+                            .attr("text-anchor", "middle") // 设置文本锚点为中心
+                            .attr("dominant-baseline", "middle")
+                            .attr("font-size", "16px")
+                            .attr("fill", "orange");
+
+                        let yis = w / 3, nis = w * 2 / 3;
+
+
+                        svg.selectAll(".yesinternet")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = yis - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                        svg.selectAll(".nointernet")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = nis - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                    });
+                    //手机
+                    d3.select("#phones").on("click", function () {
+                            svg.selectAll("text").remove();
+
+                            const internetname = ["have cell phones", "do not"];
+                            svg.selectAll("text")
+                                .data(internetname)
+                                .enter()
+                                .append("text")
+                                .text(function (d) {
+                                    return d;
+                                })
+                                .attr("x", function (d, i) {
+                                    return w / 3 * (i + 1);
+                                })
+                                .attr("y", h / 2)
+                                .attr("text-anchor", "middle") // 设置文本锚点为中心
+                                .attr("dominant-baseline", "middle")
+                                .attr("font-size", "16px")
+                                .attr("fill", "orange");
+
+                            let pys = w / 3, pns = w * 2 / 3;
+
+
+                            svg.selectAll(".havephones")
+                                .data(data)
+                                .transition()
+                                .duration(1500)
+                                .attr("cx", function (d, i) {
+                                    var nx = pys - 5 * spacingX + (i % 10) * spacingX;
+                                    return nx;
+                                })
+                                .attr("cy", function (d, i) {
+                                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                    return ny;
+                                });
+                            svg.selectAll(".nophones")
+                                .data(data)
+                                .transition()
+                                .duration(1500)
+                                .attr("cx", function (d, i) {
+                                    var nx = pns - 5 * spacingX + (i % 10) * spacingX;
+                                    return nx;
+                                })
+                                .attr("cy", function (d, i) {
+                                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                    return ny;
+                                });
+                        });
+                        //water
+                     d3.select("#water").on("click", function () {
+                            svg.selectAll("text").remove();
+
+                            const watername = ["have safe water", "do not"];
+                            svg.selectAll("text")
+                                .data(watername)
+                                .enter()
+                                .append("text")
+                                .text(function (d) {
+                                    return d;
+                                })
+                                .attr("x", function (d, i) {
+                                    return w / 3 * (i + 1);
+                                })
+                                .attr("y", h / 2)
+                                .attr("text-anchor", "middle") // 设置文本锚点为中心
+                                .attr("dominant-baseline", "middle")
+                                .attr("font-size", "16px")
+                                .attr("fill", "orange");
+
+                            let wys = w / 3, wns = w * 2 / 3;
+
+
+                            svg.selectAll(".havewater")
+                                .data(data)
+                                .transition()
+                                .duration(1500)
+                                .attr("cx", function (d, i) {
+                                    var nx = wys - 5 * spacingX + (i % 10) * spacingX;
+                                    return nx;
+                                })
+                                .attr("cy", function (d, i) {
+                                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                    return ny;
+                                });
+                            svg.selectAll(".nowater")
+                                .data(data)
+                                .transition()
+                                .duration(1500)
+                                .attr("cx", function (d, i) {
+                                    var nx = wns - 5 * spacingX + (i % 10) * spacingX;
+                                    return nx;
+                                })
+                                .attr("cy", function (d, i) {
+                                    var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                    return ny;
+                                });
+                        });    
+                    //poverty
+                d3.select("#poverty").on("click", function () {
+                        svg.selectAll("text").remove();
+
+                        const povertyname = ["live on less than 2 US dallars per day", "others"];
+                        svg.selectAll("text")
+                            .data(povertyname)
+                            .enter()
+                            .append("text")
+                            .text(function (d) {
+                                return d;
+                            })
+                            .attr("x", function (d, i) {
+                                return w / 3 * (i + 1);
+                            })
+                            .attr("y", h / 2)
+                            .attr("text-anchor", "middle") // 设置文本锚点为中心
+                            .attr("dominant-baseline", "middle")
+                            .attr("font-size", "16px")
+                            .attr("fill", "orange");
+
+                        let poys = w / 3, pons = w * 2 / 3;
+
+
+                        svg.selectAll(".havepoverty")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = poys - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                        svg.selectAll(".nopoverty")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = pons - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                    }); 
+                    //营养
+                d3.select("#nutrition").on("click", function () {
+                        svg.selectAll("text").remove();
+                        clearInterval(intervalID);
+                        //大洲
+                        const nutritionname = ["overweight", "adequate", "undernourished", "starving"];
+                        svg.selectAll("text")
+                            .data(nutritionname)
+                            .enter()
+                            .append("text")
+                            .text(function (d) {
+                                return d;
+                            })
+                            .attr("x", function (d, i) {
+                                return w / 5 * (i + 1);
+                            })
+                            .attr("y", h / 2).attr("text-anchor", "middle") // 设置文本锚点为中心
+                            .attr("dominant-baseline", "middle")
+                            .attr("font-size", "16px")
+                            .attr("fill", "orange");
+
+                        let ovs = w / 5, ads = w * 2 / 5, uns = w * 3 / 5, sts = w * 4 / 5;
+
+                        svg.selectAll(".overweight")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = ovs - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                        svg.selectAll(".adequate")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = ads - 5 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                        svg.selectAll(".undernourished")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = uns - 4 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                        svg.selectAll(".starving")
+                            .data(data)
+                            .transition()
+                            .duration(1500)
+                            .attr("cx", function (d, i) {
+                                var nx = sts - 0 * spacingX + (i % 10) * spacingX;
+                                return nx;
+                            })
+                            .attr("cy", function (d, i) {
+                                var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                                return ny;
+                            });
+                        
+                    }); 
+                //housing
+            d3.select("#housing").on("click", function () {
+                    svg.selectAll("text").remove();
+
+                    const housingname = ["have no shelter", "have a place to shelter"];
+                    svg.selectAll("text")
+                        .data(housingname)
+                        .enter()
+                        .append("text")
+                        .text(function (d) {
+                            return d;
+                        })
+                        .attr("x", function (d, i) {
+                            return w / 3 * (i + 1);
+                        })
+                        .attr("y", h / 2)
+                        .attr("text-anchor", "middle") // 设置文本锚点为中心
+                        .attr("dominant-baseline", "middle")
+                        .attr("font-size", "16px")
+                        .attr("fill", "orange");
+
+                    let hoys = w / 3, hons = w * 2 / 3;
+
+
+                    svg.selectAll(".nohousing")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = hoys - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".yeshousing")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = hons - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                }); 
+                //language
+            d3.select("#language").on("click", function () {
+                    svg.selectAll("text").remove();
+
+                    const languagename = ["Chinese", "Spanish", "English", "Arabic", "Hindi", "Bengali","Portuguese","Russian","Japanese","Other"];
+                    svg.selectAll("text")
+                        .data(languagename)
+                        .enter()
+                        .append("text")
+                        .text(function (d) {
+                            return d;
+                        })
+                        .attr("x", function (d, i) {
+                            return w / 11 * (i + 1);
+                        })
+                        .attr("y", h / 2)
+                        .attr("text-anchor", "middle") // 设置文本锚点为中心
+                        .attr("dominant-baseline", "middle")
+                        .attr("font-size", "16px")
+                        .attr("fill", "orange");
+
+                    let cis = w /11, sps = w * 2 / 11, ens = w * 3 / 11, ars = w * 4 / 11, hins = w * 5 / 11, bens = w * 6 / 11,pors=w*7/11,rus=w*8/11,japs=w*9/11,oths=w*10/11;
+
+
+                    svg.selectAll(".chinese")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = cis - 6 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".spanish")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = sps - 3* spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".english")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = ens - 2 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".arabic")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = ars - 1 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".hindi")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = hins - 2 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".bengali")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = bens - 1 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".portuguese")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = pors - 2 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                    svg.selectAll(".russian")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = rus - 1 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                    svg.selectAll(".japanese")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = japs - 1 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                    svg.selectAll(".otherlanguage")
+                    .data(data)
+                    .transition()
+                    .duration(1500)
+                    .attr("cx", function (d, i) {
+                        var nx = oths - 5 * spacingX + (i % 10) * spacingX;
+                        return nx;
+                    })
+                    .attr("cy", function (d, i) {
+                        var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                        return ny;
+                    });
+                });
+                //final
+            //housing
+                d3.select("#area").on("click", function () {
+                    svg.selectAll("text").remove();
+
+                    const areaname = ["live in rural areas", "live in urban areas"];
+                    svg.selectAll("text")
+                        .data(areaname)
+                        .enter()
+                        .append("text")
+                        .text(function (d) {
+                            return d;
+                        })
+                        .attr("x", function (d, i) {
+                            return w / 3 * (i + 1);
+                        })
+                        .attr("y", h / 2)
+                        .attr("text-anchor", "middle") // 设置文本锚点为中心
+                        .attr("dominant-baseline", "middle")
+                        .attr("font-size", "16px")
+                        .attr("fill", "orange");
+
+                    let hoys = w / 3, hons = w * 2 / 3;
+
+
+                    svg.selectAll(".rural")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = hoys - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                    svg.selectAll(".urban")
+                        .data(data)
+                        .transition()
+                        .duration(1500)
+                        .attr("cx", function (d, i) {
+                            var nx = hons - 5 * spacingX + (i % 10) * spacingX;
+                            return nx;
+                        })
+                        .attr("cy", function (d, i) {
+                            var ny = h / 2 - 15 - Math.floor(i / 10) * spacingY;
+                            return ny;
+                        });
+                }); 
+    </script>
+</body>
+
+</html>

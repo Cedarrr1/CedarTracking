@@ -1,0 +1,78 @@
+            .header {
+                font-size: xx-large;
+                font-weight: 700;
+                font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+                background-color: black;
+                color: white;
+                text-align: center;
+                padding: 15px;
+                margin: 5px;
+            }
+
+            #learning-sequence-section {
+                font-size: x-large;
+                font-weight: 700;
+                font-family: fantasy;
+                background-color: #eeeeee;
+                color: navy;
+                line-height: 30px;
+                height: 750px;
+                width: 100px;
+                float: left;
+                padding: 5px;
+            }
+
+            .question-list-nav {
+                font-size: medium;
+                font-weight: 100;
+                font-family: cursive;
+                background-color: lightslategray;
+                margin: 15px;
+                padding: 50px;
+                width: 700px;
+                float: inline-start;
+            }
+
+            .question-language-aside {
+                font-size: x-small;
+                font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+                background-color: rgb(140, 149, 152,0.3);
+                padding: 10px;
+                line-height: 20px;
+                height: 750px;
+                width: 400px;
+                float: right;
+            }
+
+            .question-language-details {
+                padding: 5px;
+                margin: 5px;
+                border: 1px solid rgb(88, 80, 192);
+                color: mediumpurple;
+                font-size: medium;
+            }
+            .frameform {
+                background-image: url("OIP-C.jpg");
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: center center;
+                text-align: center;
+                width: 1400px;
+                height: 850px;
+            }
+            .explanation {
+                float: left;
+                line-height: 30px;
+                height: 850px;
+                width: 200px;
+                background-color: rgba(0, 0, 0, 0.365);
+                color: white;
+                margin: 20px;
+                padding: 20px;
+                font-weight: 500;
+                text-indent: 10px;
+            }
+
+            span.red {
+                color: red;
+            }

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>D3 page template</title>
+    <link rel="stylesheet" href="./begin.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style> 
+        .axis path,
+        .axis line{
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+        .axis text{
+            font-size: 15px;
+        }
+        svg text{
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+<p1 style="position: relative;
+    top: -500px;
+    left: 0px;
+    display: inline-block;
+   flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;">按季节分类</p1>
+<p2 style="position: relative;
+    top: -500px;
+    left: 150px;
+    display: inline-block;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;">按动物分类</p2>
+<p3 style="position: relative;
+    top: 0px;
+    left: -150px;
+    display: inline-block;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;">按植物分类</p3>
+<p4 style="position: relative;
+    top: 0px;
+    left: 0px;
+    display: inline-block;
+  flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;">按地点分类</p4>
+<p5 style="position: relative;
+    top: -250px;
+    left: -100px;
+    display: inline-block;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;">按颜色分类</p5>
+<script style="float: right;">
+  	//数据
+        let data = [
+            {key:"春" ,value: 6832},
+            {key:"夏" ,value: 850},
+            {key:"秋" ,value: 5339},
+            {key:"冬" ,value: 700}
+        ];
+        let Xdatas = data.map(function (d) { return d.key }),
+            Ydatas = data.map(function (d) { return d.value });
+            //构建x，y输入的数组
+        let width = 800, height = 500;
+        let x = d3.scaleBand().domain(Xdatas).rangeRound([0, width]).padding(0.1);
+        let y = d3.scaleLinear().domain([0, d3.max(Ydatas)]).rangeRound([height, 0]);
+
+        let padding = { left: 50, top: 70, right: 50, bottom: 100 };
+        let svg = d3.select('body').append('svg')
+            .attr('width', width + padding.left)
+            .attr('height', height + padding.bottom);
+        let g = svg.append('g')
+        .attr('transform', 'translate(' + padding.left + ',' + padding.top + ')');
+        // 表头
+        svg.append('text').attr('transform', 'translate(' + (width / 2 - padding.left) + ',' + padding.top / 2 + ')')
+            .attr('font-weight', 600).text('唐诗用词分析');
+        // x轴和y轴
+        g.append('g').attr("class","x axis")
+        .attr('transform', 'translate(0,' + height + ')')
+            .call(d3.axisBottom(x));
+        g.append('g').attr("class","y axis")
+        .call(d3.axisLeft(y).ticks(10));
+
+       chart = g.selectAll('.bar').data(data).enter().append('g');
+
+      
+        // 矩形
+        chart.append('rect')
+                .attr('x', function (d) {
+                    return x(d.key);
+                })
+                .attr('y', function (d) {
+                    return y(y.domain()[0]) - 5;
+                })
+                .attr('fill', function (d) {
+                    // 生成随机颜色
+                    return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                })
+                .attr('stroke', '#FFF').attr('stroke-width', '3px')
+                .transition()
+                .delay(function (d, i) {
+                    return (i + 1) / Ydatas.length * 500;
+                })
+                .duration(2000)
+                .attr('y', function (d) {
+                    return y(d.value) - 5;
+                })
+                .attr('width', x.bandwidth())
+                .attr('height', function (d) {
+                    return height - y(d.value);
+                });
+           
+           
+             
+        // 矩形文字
+       chart.append('text').attr('fill', '#FFF')
+            .attr('x', function (d) {
+                return x(d.key) + 14;
+            })
+            .attr('y', function (d) {
+                return y(y.domain()[0]);
+            })
+            .transition()
+            .delay(function (d, i) {
+                return (i + 1) / Ydatas.length * 500;
+            })
+            .duration(2000)
+            .attr('y', function (d) {
+                return y(d.value);
+            })
+            .attr('dx', function (d) {
+                return (x.bandwidth() - padding.left) / 2;
+            })
+            .attr('dy', 20)
+            .text(function (d) {
+                return d.value;
+            });
+
+            chart.select("rect").on("mouseover", function () {
+                    d3.select(this)
+                        .attr("fill", "orange");
+                });
+            
+             chart.select("rect").on("mouseout", function () {
+                    d3.select(this)
+                    .attr('fill', function (d) {
+                    // 生成随机颜色
+                    return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                    })   
+                });    
+
+                
+    d3.select("p2")
+      .on("click",function(){
+            data = [
+              { key: "鸟", value: 2311 },
+              { key: "马", value: 2302 },
+              { key: "龙", value: 1764 },
+              { key: "雁", value: 1692},
+              { key: "蝉", value: 695},
+              { key: "莺", value: 694},
+              { key: "陆龟", value: 580}
+          ];
+            
+          chart.selectAll('rect').remove();
+            Xdatas = data.map(function (d) { return d.key }),
+            Ydatas = data.map(function (d) { return d.value });
+            
+            x.domain(Xdatas).rangeRound([0, width]).padding(0.1);
+            y.domain([0,d3.max(Ydatas)]).rangeRound([height, 0]);
+
+          var newX1 = d3.axisBottom(x);
+          g.select(".x.axis")
+              .transition()
+              .duration(1500)
+              .call(newX1);
+
+          var newY1 = d3.axisLeft(y);
+          g.select(".y.axis")
+              .transition()
+              .duration(1500)
+              .ease(d3.easeLinear)
+              .call(newY1);
+
+                
+                chart.selectAll("rect")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr('x', function (d) {
+                    return x(d.key);
+                })
+                .attr('y', function (d) {
+                  return y(y.domain()[0]) - 5;
+                })
+                .attr('fill', function (d) {
+                    // 生成随机颜色
+                    return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                })
+                .attr('stroke', '#FFF').attr('stroke-width', '3px')
+                .transition()
+                .delay(function (d, i) {
+                    return (i + 1) / Ydatas.length * 500;
+                })
+                .duration(2000)
+                .attr('y', function (d) {
+                    return y(d.value) - 5;
+                })
+                .attr('width', x.bandwidth())
+                .attr('height', function (d) {
+                    return height - y(d.value);
+                });
+                 chart.selectAll('text').remove();
+              chart.selectAll("text")
+              .data(data)
+              .enter()
+              .append("text")
+              .attr('x', function (d) {
+                  return x(d.key) + 14;
+              })
+              .attr('y', function (d) {
+                  return y(y.domain()[0]);
+              })
+              .transition()
+              .delay(function (d, i) {
+                  return (i + 1) / Ydatas.length * 500;
+              })
+              .duration(2000)
+              .attr('y', function (d) {
+                  return y(d.value);
+              })
+              .attr('dx', function (d) {
+                  return (x.bandwidth() - padding.left) / 2;
+              })
+              .attr('dy', 20)
+              .text(function (d) {
+                  return d.value;
+              });
+              
+              chart.select("rect").on("mouseover", function () {
+              d3.select(this)
+                  .attr("fill", "orange");
+          });
+
+          chart.select("rect").on("mouseout", function () {
+              d3.select(this)
+                  .attr('fill', function (d) {
+                      // 生成随机颜色
+                      return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                  })
+          });  
+
+      });
+
+
+        d3.select("p3")
+            .on("click", function () {
+                data = [
+                    { key: "树", value: 3707 },
+                    { key: "林", value: 2628 },
+                    { key: "草", value: 2613 },
+                    { key: "松", value: 2512 },
+                    { key: "竹", value: 2444 },
+                    { key: "柳", value: 1914},
+                    { key: "叶", value: 1864 },
+                    { key: "苔" , value : 986 },
+                    { key: "梅", value: 744},
+                    { key: "菊", value: 521},
+                    { key: "桃", value: 500},
+                ];
+
+                chart.selectAll('rect').remove();
+                Xdatas = data.map(function (d) { return d.key }),
+                    Ydatas = data.map(function (d) { return d.value });
+
+                x.domain(Xdatas).rangeRound([0, width]).padding(0.1);
+                y.domain([0, d3.max(Ydatas)]).rangeRound([height, 0]);
+
+                var newX2 = d3.axisBottom(x);
+                g.select(".x.axis")
+                    .transition()
+                    .duration(1500)
+                    .call(newX2);
+
+                var newY2 = d3.axisLeft(y);
+                g.select(".y.axis")
+                    .transition()
+                    .duration(1500)
+                    .call(newY2);
+
+
+                chart.selectAll("rect")
+                    .data(data)
+                    .enter()
+                    .append("rect")
+                    .attr('x', function (d) {
+                        return x(d.key);
+                    })
+                    .attr('y', function (d) {
+                        return y(y.domain()[0]) - 5;
+                    })
+                    .attr('fill', function (d) {
+                        // 生成随机颜色
+                        return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                    })
+                    .attr('stroke', '#FFF').attr('stroke-width', '3px')
+                    .transition()
+                    .delay(function (d, i) {
+                        return (i + 1) / Ydatas.length * 500;
+                    })
+                    .duration(2000)
+                    .attr('y', function (d) {
+                        return y(d.value) - 5;
+                    })
+                    .attr('width', x.bandwidth())
+                    .attr('height', function (d) {
+                        return height - y(d.value);
+                    });
+                chart.selectAll('text').remove();
+                chart.selectAll("text")
+                    .data(data)
+                    .enter()
+                    .append("text")
+                    .attr('x', function (d) {
+                        return x(d.key) + 14;
+                    })
+                    .attr('y', function (d) {
+                        return y(y.domain()[0]);
+                    })
+                    .transition()
+                    .delay(function (d, i) {
+                        return (i + 1) / Ydatas.length * 500;
+                    })
+                    .duration(2000)
+                    .attr('y', function (d) {
+                        return y(d.value);
+                    })
+                    .attr('dx', function (d) {
+                        return (x.bandwidth() - padding.left) / 2;
+                    })
+                    .attr('dy', 20)
+                    .text(function (d) {
+                        return d.value;
+                    });
+
+                    chart.select("rect").on("mouseover", function () {
+                    d3.select(this)
+                        .attr("fill", "orange");
+                });
+
+                chart.select("rect").on("mouseout", function () {
+                    d3.select(this)
+                        .attr('fill', function (d) {
+                            // 生成随机颜色
+                            return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                        })
+                });  
+
+            });
+
+    d3.select("p4")
+        .on("click", function () {
+            data = [
+                { key: "长安", value: 1037 },
+                { key: "江南", value: 707 },
+                { key: "洛阳", value: 600 },
+                { key: "洞庭", value: 538 },
+                { key: "南山", value: 490 },
+            ];
+
+            chart.selectAll('rect').remove();
+            Xdatas = data.map(function (d) { return d.key }),
+                Ydatas = data.map(function (d) { return d.value });
+
+            x.domain(Xdatas).rangeRound([0, width]).padding(0.1);
+            y.domain([0, d3.max(Ydatas)]).rangeRound([height, 0]);
+
+            var newX2 = d3.axisBottom(x);
+            g.select(".x.axis")
+                .transition()
+                .duration(1500)
+                .call(newX2);
+
+            var newY2 = d3.axisLeft(y);
+            g.select(".y.axis")
+                .transition()
+                .duration(1500)
+                .call(newY2);
+
+
+            chart.selectAll("rect")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr('x', function (d) {
+                    return x(d.key);
+                })
+                .attr('y', function (d) {
+                    return y(y.domain()[0]) - 5;
+                })
+                .attr('fill', function (d) {
+                    // 生成随机颜色
+                    return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                })
+                .attr('stroke', '#FFF').attr('stroke-width', '3px')
+                .transition()
+                .delay(function (d, i) {
+                    return (i + 1) / Ydatas.length * 500;
+                })
+                .duration(2000)
+                .attr('y', function (d) {
+                    return y(d.value) - 5;
+                })
+                .attr('width', x.bandwidth())
+                .attr('height', function (d) {
+                    return height - y(d.value);
+                });
+            chart.selectAll('text').remove();
+            chart.selectAll("text")
+                .data(data)
+                .enter()
+                .append("text")
+                .attr('x', function (d) {
+                    return x(d.key) + 14;
+                })
+                .attr('y', function (d) {
+                    return y(y.domain()[0]);
+                })
+                .transition()
+                .delay(function (d, i) {
+                    return (i + 1) / Ydatas.length * 500;
+                })
+                .duration(2000)
+                .attr('y', function (d) {
+                    return y(d.value);
+                })
+                .attr('dx', function (d) {
+                    return (x.bandwidth() - padding.left) / 2;
+                })
+                .attr('dy', 20)
+                .text(function (d) {
+                    return d.value;
+                });
+
+
+                chart.select("rect").on("mouseover", function () {
+                d3.select(this)
+                    .attr("fill", "orange");
+            });
+
+            chart.select("rect").on("mouseout", function () {
+                d3.select(this)
+                    .attr('fill', function (d) {
+                        // 生成随机颜色
+                        return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                    })
+            });  
+        });
+
+
+    d3.select("p5")
+        .on("click", function () {
+            data = [
+                { key: "白", value: 3034 },
+                { key: "青", value: 2460 },
+                { key: "翠", value: 1867 },
+                { key: "碧", value: 1867 },
+                { key: "绿", value: 1790 },
+                { key: "紫", value: 1719},
+                { key: "黄", value: 1610 },
+                { key: "朱", value: 1475},
+                { key: "丹", value: 1004 },
+            ];
+
+            chart.selectAll('rect').remove();
+            Xdatas = data.map(function (d) { return d.key }),
+                Ydatas = data.map(function (d) { return d.value });
+
+            x.domain(Xdatas).rangeRound([0, width]).padding(0.1);
+            y.domain([0, d3.max(Ydatas)]).rangeRound([height, 0]);
+
+            var newX2 = d3.axisBottom(x);
+            g.select(".x.axis")
+                .transition()
+                .duration(1500)
+                .call(newX2);
+
+            var newY2 = d3.axisLeft(y);
+            g.select(".y.axis")
+                .transition()
+                .duration(1500)
+                .call(newY2);
+
+
+            chart.selectAll("rect")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr('x', function (d) {
+                    return x(d.key);
+                })
+                .attr('y', function (d) {
+                    return y(y.domain()[0]) - 5;
+                })
+                .attr('fill', function (d) {
+                    // 生成随机颜色
+                    return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                })
+                .attr('stroke', '#FFF').attr('stroke-width', '3px')
+                .transition()
+                .delay(function (d, i) {
+                    return (i + 1) / Ydatas.length * 500;
+                })
+                .duration(2000)
+                .attr('y', function (d) {
+                    return y(d.value) - 5;
+                })
+                .attr('width', x.bandwidth())
+                .attr('height', function (d) {
+                    return height - y(d.value);
+                });
+            chart.selectAll('text').remove();
+            chart.selectAll("text")
+                .data(data)
+                .enter()
+                .append("text")
+                .attr('x', function (d) {
+                    return x(d.key) + 14;
+                })
+                .attr('y', function (d) {
+                    return y(y.domain()[0]);
+                })
+                .transition()
+                .delay(function (d, i) {
+                    return (i + 1) / Ydatas.length * 500;
+                })
+                .duration(2000)
+                .attr('y', function (d) {
+                    return y(d.value);
+                })
+                .attr('dx', function (d) {
+                    return (x.bandwidth() - padding.left) / 2;
+                })
+                .attr('dy', 20)
+                .text(function (d) {
+                    return d.value;
+                });
+
+
+                chart.select("rect").on("mouseover", function () {
+                d3.select(this)
+                    .attr("fill", "orange");
+            });
+
+            chart.select("rect").on("mouseout", function () {
+                d3.select(this)
+                    .attr('fill', function (d) {
+                        // 生成随机颜色
+                        return '#' + Math.floor(Math.random() * 0xffffff).toString(16);
+                    })
+            });  
+        });
+
+
+    </script>
+
+</div>
+       
+
+
+
+
+
+</body>
+   
+
+
+
+</html>
+
+

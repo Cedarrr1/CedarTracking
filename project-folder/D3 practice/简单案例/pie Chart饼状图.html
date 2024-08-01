@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>D3 page template</title>
+   
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    
+
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-size: 15px;
+        }
+
+        .legend {
+            font-size: 14px;
+        }
+
+        .legend rect {
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .legend text {
+            fill: black;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        
+
+        const dataset = [
+            { name: '不能回答', value: 9 },
+            { name: '了解不多', value: 12 },
+            { name: '熟悉概念', value: 3 }
+        ];
+
+        const pie = d3.pie().value(d => d.value);
+
+        const w = 600, h = 300; // Adjusted width for better display
+        const outerRadius = Math.min(w, h) / 2;
+        const innerRadius = outerRadius / 2;
+
+        const arc = d3.arc()
+            .innerRadius(innerRadius)
+            .outerRadius(outerRadius);
+
+        const svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h)
+            .append("g")
+            .attr("transform", `translate(${w / 2},${h / 2})`);
+
+        const color = d3.scaleOrdinal()
+    .range(["#a6cee3", "#b2df8a", "#fb9a99"]); // Or any other combination you prefer
+
+
+        const arcs = svg.selectAll("g.arc")
+            .data(pie(dataset))
+            .enter()
+            .append("g")
+            .attr("class", "arc");
+
+        arcs.append("path")
+            .attr("fill", (d, i) => color(i))
+            .attr("d", arc);
+
+        arcs.append("text")
+            .attr("transform", d => `translate(${arc.centroid(d)})`)
+            .attr("text-anchor", "middle")
+            .text(d => {
+                const percentage = (d.endAngle - d.startAngle) / (2 * Math.PI) * 100;
+                return percentage.toFixed(1) + '%';
+            });
+
+        // Adding legend
+        const legend = svg.selectAll('.legend')
+            .data(dataset)
+            .enter().append('g')
+            .attr('class', 'legend')
+            .attr('transform', (d, i) => `translate(0, ${i * 20})`);
+
+        legend.append('rect')
+            .attr('x', outerRadius + 35)
+            .attr('width', 10)
+            .attr('height', 10)
+            .style('fill', (d, i) => color(i));
+
+        legend.append('text')
+            .attr('x', outerRadius + 50)
+            .attr('y', 9)
+            .text(d => d.name);
+
+    </script>
+
+</body>
+<button id="exportButton">导出为PNG</button>
+
+<script>
+    document.getElementById('exportButton').addEventListener('click', function() {
+        const svgElement = document.querySelector('svg');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const svgString = new XMLSerializer().serializeToString(svgElement);
+        const DOMURL = window.URL || window.webkitURL || window;
+
+        const img = new Image();
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        const url = DOMURL.createObjectURL(svgBlob);
+
+        img.onload = function() {
+            canvas.width = svgElement.clientWidth;
+            canvas.height = svgElement.clientHeight;
+            ctx.drawImage(img, 0, 0);
+            DOMURL.revokeObjectURL(url);
+
+            const imgData = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = 'chart.png';
+            link.click();
+        };
+
+        img.src = url;
+    });
+</script>
+
+</html>

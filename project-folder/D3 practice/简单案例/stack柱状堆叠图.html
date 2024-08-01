@@ -1,0 +1,76 @@
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>D3 page template</title>
+    <link rel="stylesheet" href="./begin.css">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-size: 15px;
+        }
+       
+    </style>
+</head>
+<body>
+    <script>
+        
+       let w = 400, h = 400;
+        let padding = { left: 50, top: 70, right: 50, bottom: 100 };
+        let svg = d3.select('body').append('svg')
+            .attr('width', w + padding.left + padding.right)
+            .attr('height', h + padding.bottom + padding.top);
+
+        const g = svg.append("g").attr("id", "maingroup")
+            .attr("transform", `translate(${padding.left},${padding.top})`);
+
+        const naiveData = [
+            { year: 1900, apples: 640, bananas: 960, cherries: 640 },
+            { year: 2000, apples: 320, bananas: 480, cherries: 640 }
+        ];
+        const naiveKeys = ["apples", "bananas", "cherries"];
+        let naiveStack = d3.stack()
+            .keys(naiveKeys)
+            .order(d3.stackOrderNone)(naiveData);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(naiveStack, d => d3.max(d, sub => sub[1]))])
+            .range([h, 0]).nice();
+        const xScale = d3.scaleBand()
+            .domain(naiveData.map(d => d.year))
+            .range([0, w])
+            .padding(0.1);
+
+        svg.append("g")
+                .attr("transform", "translate("+padding.left+"," + (h+padding.top) + ")")
+                .call(d3.axisBottom(xScale));
+            svg.append("g")
+                .attr("transform", "translate("+padding.left+","+padding.top+")")
+                .call(d3.axisLeft(yScale));
+
+        const color = d3.scaleOrdinal()
+            .domain(naiveKeys)
+            .range(d3.schemeSet3);
+
+        g.selectAll(".datagroup").data(naiveStack).enter().append("g")
+            .attr("class", "datagroup")
+            .attr("fill", d => color(d.key))
+            .selectAll(".datarect").data(d => d)
+            .enter().append("rect")
+            .attr("class", "datarect")
+            .attr("x", d => xScale(d.data.year))
+            .attr("y", d => yScale(d[1]))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => yScale(d[0]) - yScale(d[1]));
+        
+        
+    </script>
+</body>

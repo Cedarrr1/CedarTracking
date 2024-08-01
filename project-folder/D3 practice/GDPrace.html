@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDP racing temple</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+
+
+       
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+<svg width="1000" height="800"></svg>
+
+    <script>
+        let margin = { top: 50, right: 80, bottom: 50, left: 50 };
+        let width = 1000 - margin.left - margin.right;
+        let height = 800 - margin.top - margin.bottom;
+
+        let svg = d3.select("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        let x = d3.scaleLinear()
+            .range([0, width]);
+
+        let y = d3.scaleBand()
+            .range([0, height])
+            .padding(0.1);
+
+        let xAxis = d3.axisBottom(x)
+            .tickFormat(d => `${d} 亿元`)
+            .tickSizeInner(-height);//“轴线”
+
+        let yAxis = d3.axisLeft(y)
+            .tickSize(0);
+
+        let bars = svg.append("g");
+
+        let gX = svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .attr("class", "x-axis");
+
+        let gY = svg.append("g")
+            .attr("class", "y-axis");
+
+        let values = svg.append("g")
+            .attr("class", "values");
+
+       
+
+        function update(data, year) {
+            x.domain([0, d3.max(data.top10, d => d.gdp)]);
+            y.domain(data.top10.map(d => d.country));
+
+            gX.call(xAxis);
+            gY.call(yAxis);
+
+            let bar = bars.selectAll(".bar")
+                .data(data.top10, d => d.country);
+
+            bar.exit()
+                .transition()
+                .duration(1500)
+                .ease(d3.easeLinear)
+                .attr("y",height+margin.bottom)
+                .attr("fill","red")
+                .remove();
+            let threshold=1000;//判定是否大幅度增长
+            bar.enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", 0)
+                .attr("y", d => y(d.country))
+                .attr("height", y.bandwidth())
+                .attr("width", 0)
+                .attr("fill",d=>d.gdp >threshold ? "lightyellow": "green")
+                .merge(bar)
+                .transition()
+                .duration(1500)
+                .ease(d3.easeLinear)
+                .attrTween("width", function (d) {
+                    var currentw =  parseFloat(d3.select(this).attr("width"));
+                    var i = d3.interpolate(currentw, x(d.gdp)); // 创建插值函数，从当前值到目标值
+                    return function (t) {
+                        return i(t); // 返回插值结果
+                    };
+                })
+                .attr("y", d => y(d.country))
+                .attr("height", y.bandwidth())
+                .attr("fill", "black");
+
+            let valueText = values.selectAll(".value")
+                .data(data.top10, d => d.country);
+
+            valueText.exit()
+                .transition(1500)
+                .remove();
+
+            valueText.enter().append("text")
+                .attr("class", "value")
+                .attr("x", d => x(0) + 25)
+                .attr("y", d => y(d.country) + y.bandwidth() / 2)
+                .attr("text-anchor", "start")
+                .attr("alignment-baseline", "middle")
+                .text(d => `${d.gdp.toFixed(2)}  `)
+                .merge(valueText)
+                .transition()
+                .duration(1500)
+                .ease(d3.easeLinear)
+                .attr("x", d => x(d.gdp) + 5) 
+                .attr("y", d => y(d.country) + y.bandwidth() / 2)
+                .tween("text", function (d) {
+                    var currentValue = parseFloat(d3.select(this).text());
+                    var i = d3.interpolate(currentValue, d.gdp); // 创建插值函数，从当前值到目标值
+                    return function (t) {
+                        d3.select(this).text(Math.floor(i(t))); // 文本渐变增长
+                        //t由d3内部控制 从0初态到1末态
+                    };
+                });
+                
+
+            let yearText = svg.selectAll(".year-text")
+                .data([year]);
+
+            yearText.enter()
+                .append("text")
+                .attr("class", "year-text")
+                .attr("x", margin.left + width / 2)
+                .attr("y", height / 2)
+                .attr("text-anchor", "middle")
+                .attr("alignment-baseline", "middle")
+                .attr("fill", "lightgray")
+                .attr("font-size", "196px")
+                .merge(yearText)
+                .text(d => d); 
+        }
+
+
+        d3.csv("gdp_data_source.csv")
+            .then(function (data) {
+                data = data.map(d => {
+                let countryGDP = Object.entries(d).slice(1);
+                
+                let top10 = countryGDP.sort((a, b) => b[1] - a[1]).slice(0, 10);
+                    return {
+                        year: d.year,
+                        top10: top10.map(entry => ({ country: entry[0], gdp: +entry[1] / 1e8 }))
+                    };
+                });
+                
+                let i = 0;
+
+                function updateData() {
+                    if (i >= data.length) return;
+                    let year = data[i].year;
+                    update(data[i], year);
+                    i++;
+                    setTimeout(updateData, 1500);
+                }
+
+                updateData();
+
+            })
+                .catch(function (error) {
+                console.log("Error loading the csv", error);
+        });
+    </script>
+</body>
+
+</html>
